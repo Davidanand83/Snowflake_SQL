@@ -1,0 +1,186 @@
+show databases like 'sno%';
+
+use my_db;
+select current_role(), current_database(),current_schema();
+//----------------------------------------------------------------------------------------------
+create schema my_schema
+comment = 'this is my demo schema under my_db';
+
+show schemas;
+
+use schema my_schema;
+
+drop table if exists my_table;
+create table my_table(
+id int autoincrement,
+num number,
+num10_1 number(10,1),
+decimal_20_2 decimal(20,2),
+numeric numeric(30,3),
+int int,
+integer integer
+);
+
+
+desc table my_table;
+
+select get_ddl('table','my_table');
+
+select * from my_table;
+select * from my_db.my_schema.my_table;
+
+insert into my_table(num,num10_1,decimal_20_2,numeric,int,integer)
+values(10,23.2,33.33,123456789,987654231,12112),
+(20,22.2,33.33,123456789,987654231,12112);
+
+
+//----------------------------------------------------------------------------------------------
+
+drop table if exists my_text_table;
+create table my_text_table(
+id int autoincrement,
+v varchar,
+v550 varchar(50),
+c char,
+c10 char(10),
+s string,
+s20 string(20),
+t text,
+t30 text(30)
+);
+
+desc table my_text_table;
+
+//----------------------------------------------------------------------------------------------
+create or replace table my_boolean_table(
+b boolean,
+n number,
+s string
+
+);
+
+
+desc table my_boolean_table;
+
+insert into my_boolean_table values(true,1 ,'Yes'), (false,0,'no'), (null,null,null);
+select * from my_boolean_table;
+
+
+//----------------------------------------------------------------------------------------------
+drop table if exists my_table_ts;
+create or replace table my_table_ts
+(
+today_date date default current_date(),
+now_time time default   current_time(),
+now_ts timestamp default current_timestamp()
+);
+
+insert into my_table_ts(today_date, now_time,now_ts) values(current_date,current_time,current_timestamp);
+
+desc table my_table_ts;
+select * from my_table_ts;
+
+//----------------------------------------------------------------------------------------------
+
+alter session set timezone='America/Los_Angeles';
+alter session set timezone='Japan';
+
+//----------------------------------------------------------------------------------------------
+
+create table my_clone_table as select * from my_db.my_schema.my_table;
+ select * from my_clone_table;
+
+ //----------------------------------------------------------------------------------------------
+
+
+ desc file format my_csv_format;
+
+            drop table if exists my_constaints_table;
+            create table my_constaints_table (
+            emp_pk string primary key,
+            fname string not null,
+            lname string not null,
+            flag string default 'active',
+            unique_code string unique
+            
+            );
+
+
+            desc table my_constaints_table;
+
+
+
+insert into my_constaints_table (emp_pk,fname,lname,flag,unique_code)
+values ('100','john3','k','false','1000')
+
+
+,
+ ('100','john2','k','1000');
+
+ select * from my_constaints_table ;
+
+
+
+
+//----------------------------------------------------------------------------------------------
+
+create or replace file format my_csv_format type=csv field_delimiter=',' skip_header=1 null_if=('Null','null') empty_field_as_null=true compression =gzip;
+
+
+create or replace file format my_csv_format type = csv field_delimiter = '|' skip_header = 1 null_if = ('NULL', 'null') empty_field_as_null = true compression = gzip;
+
+
+create or replace stage my_stage
+  file_format = (type = 'CSV' field_delimiter = '|' skip_header = 1);
+
+  list @my_stage;
+
+  drop stage my_stage;
+
+  show tables;
+
+put file:///C:/Users/DELL/Downloads/my_csv.csv @my_stage;
+
+
+
+select t.$1,t.$2,t.$3,t.$4,t.$5,t.$6 from @my_stage(file_format => 'my_csv_format' ) t;
+
+select * from my_table;
+desc table my_table;
+desc file format my_csv_format;
+
+copy into my_table from @my_stage ;
+
+//----------------------------------------------------------------------------------------------
+//Connect SnowSQL Command
+ /* Formatted */
+SELECT LOWER(CONCAT('SNOWSQL -A '
+                  , LOWER(CURRENT_ACCOUNT())
+                  , '.', LOWER(REPLACE(CURRENT_REGION(), 'AWS_', ''))
+                  , '.AWS -U '
+                  , LOWER(CURRENT_USER())
+                   )
+            );
+
+
+
+
+
+
+//----------------------------------------------------------------------------------------------
+create table json_weather_data(v variant);
+
+copy into json_weather_data from @nyc_weather file_format = (type=json);
+select * from  json_weather_data;
+
+
+
+//----------------------------------------------------------------------------------------------
+drop table MY_BOOLEAN_TABLE;
+drop table MY_CLONE_TABLE;
+drop table MY_CONSTAINTS_TABLE;
+drop table MY_TABLE;
+drop table MY_TABLE_TS;
+drop table MY_TEXT_TABLE;
+drop stage my_stage;
+drop table json_weather_data;

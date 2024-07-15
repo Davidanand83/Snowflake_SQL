@@ -1,0 +1,47 @@
+use role accountadmin;
+alter warehouse COMPUTE_WH resume;
+
+
+
+use role sysadmin;
+use warehouse compute_wh;
+create or replace database my_db_08 comment ='Database for chapter-8';
+create schema my_schema_08 comment ='schema for chapter-8';
+use database my_db_08;
+use schema my_schema_08;
+
+//this is how we can use it
+create or replace sequence seq_01 start =1 increment =1 comment='This is a trial ';
+create or replace sequence seq_02 start =1 increment =2 comment='This is a trial ';
+create or replace sequence seq_03 start =0 increment =-2 comment='This is a trial for negative increment';
+
+desc sequence seq_01;
+desc sequence seq_02;
+desc sequence seq_03;
+
+create or replace table my_tbl_01( i integer);
+
+//how to get next value
+select seq_01.nextval, seq_02.nextval,seq_03.nextval;
+
+//in table field
+create or replace table my_tbl_02(
+pk int autoincrement,
+seq1 int default seq_01.nextval,
+seq2 int default seq_02.nextval,
+seq3 int default seq_03.nextval,
+msg string
+
+);
+
+desc table my_tbl_02;
+select get_ddl('table','my_tbl_02');
+
+insert into my_tbl_02(msg) values ('msg-2');
+
+show sequences;
+show sequences like '%01';
+
+select * from my_tbl_02;
+
+
